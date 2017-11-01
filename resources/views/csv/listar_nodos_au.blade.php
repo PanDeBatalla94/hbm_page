@@ -22,31 +22,24 @@
 		{ 
 			bSuccess = false;
 		//reemplazar valores   
-		var count =0;
-		var id;
-		for (var key in data[i]) {
+			var count =0;
+			var id;
+			for (var key in data[i]) {
 
-		  data[i][key] = data[i][key].replace('{','');
-		  data[i][key] = data[i][key].replace('}','');
-		  if(count==0)
-		  {
-				id=data[i][key] ;
-		  }
-		  count++;
-		}
+			  data[i][key] = data[i][key].replace('{','');
+			  data[i][key] = data[i][key].replace('}','');
+			  if(count==0)
+			  {
+					id=data[i][key] ;
+			  }
+		  	  count++;
+			}
 		
 		   firebase.database().ref("{{$ruta['nodo']}}"+"/"+id).set(data[i]).then(function() { bSuccess =true; })
-
 		}
 
 		});
 
-		//if(bSuccess)
-		//{
-		//	window.location.href=
-		//}
-     	//convertir_csv(ruta, nodo);
-      //obtener_nodos();
     });
      function onSuccess(res) {
 	  return true;

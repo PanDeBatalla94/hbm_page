@@ -7,69 +7,34 @@ function obtener_nodos(){
 //ontienevalores de nodos que se actualizan
   const divListado = document.getElementById('listaNodos');
   const fDB = firebase.database().ref();
-  /*preDB.on('value', snap => function(){
-
- 
-  html = html+'<div class="card"> <div class="card-header" role="tab" id="headingOne"><h5 class="mb-0">';
-  html = html+'       <a data-toggle="collapse" data-parent="#accordion" href="#'+preDB.key()+'" aria-expanded="true" aria-controls="collapseOne">';
-  html = html+         preDB.key();
-  html = html+'       </a> </h5></div>';
-
-  html = html+'   <div id="'+preDB.key()+'" class="collapse " role="tabpanel" aria-labelledby="headingOne">';
-  html = html+'     <div class="card-block">';
-  html = html+'<div class="table-responsive" >';
-  html = html+'        <table class="table table-bordered">';
-
- //   html = html + html_tab;
-//   html = html+'</tr>';
-   html = html+'</table>';
-   html = html+'     </div>';
-   html = html+'     </div>';
-   html = html+'   </div>';
-   html = html+' </div>';
-
-});*/
-var sNodo;
-divListado.innerHTML='';
-fDB.on("child_added",function (snapshot) {
+  var sNodo;
+  divListado.innerHTML='';
+  fDB.on("child_added",function (snapshot) {
   
-            key = snapshot.key;         
-           // tablas.push([key]);
-            //snapshot.forEach(function (childSnapshot) {
+      key = snapshot.key;         
+      sNodo = key;
+      //MOSTRAR TODOS LOS NODOS
+      html = '';
+      html = html+'<div class="card"> <div class="card-header" role="tab" id="headingOne"><h5 class="mb-0">';
+      html = html+'       <a data-toggle="collapse" data-parent="#accordion" href="#'+key+'" aria-expanded="true" aria-controls="collapseOne" onclick="get_nodo(\''+sNodo+'\')">';
+      html = html+         key;
+      html = html+'       </a> </h5></div>';
 
-               // key = childSnapshot.key;
-                //console.log(key);
-                //aNodos.push(key);
-                /*starCountRef = firebase.database().ref("/"+key);
-                starCountRef.on('value', function (snapshot) {
-                    console.log(snapshot.val());
-                    usuarios.push([key,snapshot.val()]);
-                });*/
+      html = html+'   <div id="'+key+'" class="collapse " role="tabpanel" aria-labelledby="headingOne">';
+      html = html+'     <div class="card-block"><form><div id="tab_'+key+'"></div></form>';
+      
 
-                sNodo = key;
-                //MOSTRAR TODOS LOS NODOS
-                html = '';
-                html = html+'<div class="card"> <div class="card-header" role="tab" id="headingOne"><h5 class="mb-0">';
-                html = html+'       <a data-toggle="collapse" data-parent="#accordion" href="#'+key+'" aria-expanded="true" aria-controls="collapseOne" onclick="get_nodo(\''+sNodo+'\')">';
-                html = html+         key;
-                html = html+'       </a> </h5></div>';
+     //   html = html + html_tab;
+    //   html = html+'</tr>';
 
-                html = html+'   <div id="'+key+'" class="collapse " role="tabpanel" aria-labelledby="headingOne">';
-                html = html+'     <div class="card-block"><form><div id="tab_'+key+'"></div></form>';
-                
-
-               //   html = html + html_tab;
-              //   html = html+'</tr>';
-
-                 html = html+'     </div>';
-                 html = html+'     </div>';
-                 html = html+'   </div>';
-                 html = html+' </div>';
-                divListado.insertAdjacentHTML('beforeend', html); 
-           // });
+       html = html+'     </div>';
+       html = html+'     </div>';
+       html = html+'   </div>';
+       html = html+' </div>';
+      divListado.insertAdjacentHTML('beforeend', html); 
+ // });
 //
-
-}); 
+  }); 
 
 
 
@@ -78,12 +43,17 @@ fDB.on("child_added",function (snapshot) {
 }
 var tam='';
 var rowId='';
+
 function get_nodo(sNodo){
-
+  const fDEB = firebase.database().ref();
+  fDEB.on("child_added",function (snapshot) {
+      key = snapshot.key;          
+  }); 
   var html_tab = '';
+  var html_tab_row = '';
   const divTabla= document.getElementById('tab_'+sNodo);
-
-  const fDB = firebase.database().ref().child(sNodo);
+  const fDB = firebase.database().ref().child(sNodo+"/");
+  
   html_tab = html_tab+'<div class="table-responsive" >';
   html_tab = html_tab+'<table class="table table-bordered">';
   //cabecera tabla
@@ -97,43 +67,34 @@ function get_nodo(sNodo){
   });
   //tabla
   html_tab = html_tab+'</tr> ';
-
-  fDB.on("child_added",function (snapshot) {
-      html_tab = html_tab+'<tr> <td>'+snapshot.key+'</td>';
-      snapshot.forEach(function (childSnapshot) {
-      //CREA TABLA CON INFORMACION PERTENECIENTE AL NODO               
-      html_tab = html_tab+'<td>'+childSnapshot.val()+'</td>';           
-    });
-
-    html_tab = html_tab+'</tr>';
-                
- 
-  }); 
   html_tab = html_tab+'        </table>';
   html_tab = html_tab+'        </div>';
 
- // console.log(html_tab);
   divTabla.innerHTML=  html_tab; 
 
+  fDB.on("child_added",function (snapshot) {
+      html_tab_row = '';
+      html_tab_row = html_tab_row+'<tr onclick= "click_row($(this),\''+sNodo+'\')"> <td>'+snapshot.key+'</td>';
+      snapshot.forEach(function (childSnapshot) {
+        html_tab_row = html_tab_row+'<td>'+childSnapshot.val()+'</td>';           
+      });
+      html_tab_row = html_tab_row+'</tr>';
 
+      divTabla.children[0].children[0].children[0].insertAdjacentHTML('beforeEnd',html_tab_row);
+     
+  }); 
 
+}
 
-  //funcion para habilitar inpur en las tablas
+function click_row(e,nodo){
 
-  $('#tab_'+sNodo + ' tr').click(function () {
-   
-   
-    row = $(this);
-  
     var sCellValue = '';
     var tTd = '';
     var input = '';
     var sValue = '';
-    var aInput = $(this)[0].parentElement.getElementsByTagName("input"); //todas las filas
+    var aInput = e[0].parentElement.getElementsByTagName("input"); //todas las filas
+    var element = e[0].children[0];
 
-    var element = $(this)[0].children[0];
-
- 
     if(rowId !=  element.innerText)
     {
       for (var j = 0; j < aInput.length; j++)
@@ -143,30 +104,65 @@ function get_nodo(sNodo){
          j--;
       }
     }
-
-    var element = $(this)[0].children[0].getElementsByTagName("input")[0];
+    element = e[0].children[0].getElementsByTagName("input")[0];
     if(element == undefined)
     {
-      for(var i = 0 ; i < $(this)[0].children.length; i++)
+      for(var i = 0 ; i < e[0].children.length; i++)
       {
-        sCellValue = $(this)[0].children[i].innerText;
-        tTd = $(this).find('td');
+        sCellValue = e[0].children[i].innerText;
+        tTd = e.find('td');
         input = document.createElement("input");
         input.type = "text";
         input.className = "form-control";
         input.value = sCellValue;
         tTd[i].innerText= ''; 
         tTd[i].append(input);
-
-        rowId = $(this)[0].children[0].innerText;
+        rowId = e[0].children[0].innerText;
       }
-
-
+     // MODIFICAR REGISTRO AL PRESIONAR ENTER
+      $(e[0]).keypress(function (event) {
+          if(event.charCode == 13)
+          {
+            modificar_row(e,nodo);
+          }          
+        })
     }
+}
 
-    
+function modificar_row(row,nodo){
+  event.preventDefault();
+  var sId = row[0].children[0].children[0].value;
+  console.log(sId);
+  var database = firebase.database();
+  var array={};
+  var json ;
 
-    
-  })
+
+  var aTh = row[0].parentElement.children[0].children;
+
+  for(var i = 1 ; i < row[0].children.length; i++)
+  {
+    console.log(aTh[i].innerText + " -> "+row[0].children[i].children[0].value);
+    array[aTh[i].innerText] = row[0].children[i].children[0].value;
+
+    /*sCellValue = e[0].children[i].innerText;
+    tTd = e.find('td');
+    input = document.createElement("input");
+    input.type = "text";
+    input.className = "form-control";
+    input.value = sCellValue;
+    tTd[i].innerText= ''; 
+    tTd[i].append(input);
+    rowId = e[0].children[0].innerText;*/
+  }
+  console.log(array);
+
+  json = JSON.stringify(array);
+console.log(JSON.stringify(array));
+
+  firebase.database().ref(nodo+"/"+sId).set(
+    json
+    ).then(function() { bSuccess =true; })
+
 
 }
