@@ -10,7 +10,7 @@ function obtener_nodos(){
   var sNodo;
   divListado.innerHTML='';
   fDB.on("child_added",function (snapshot) {
-  
+ 
       key = snapshot.key;         
       sNodo = key;
       //MOSTRAR TODOS LOS NODOS
@@ -37,6 +37,11 @@ function obtener_nodos(){
   }); 
 
 
+  fDB.on("child_removed",function (snapshot) {
+    document.getElementById(snapshot.key).parentElement.remove();
+  }); 
+
+
 
 
 
@@ -45,10 +50,10 @@ var tam='';
 var rowId='';
 
 function get_nodo(sNodo){
-  const fDEB = firebase.database().ref();
+ /* const fDEB = firebase.database().ref();
   fDEB.on("child_added",function (snapshot) {
       key = snapshot.key;          
-  }); 
+  }); */
   var html_tab = '';
   var html_tab_row = '';
   const divTabla= document.getElementById('tab_'+sNodo);
@@ -73,16 +78,34 @@ function get_nodo(sNodo){
   divTabla.innerHTML=  html_tab; 
 
   fDB.on("child_added",function (snapshot) {
+    console.log(snapshot.key);
       html_tab_row = '';
       html_tab_row = html_tab_row+'<tr onclick= "click_row($(this),\''+sNodo+'\')"> <td>'+snapshot.key+'</td>';
-      snapshot.forEach(function (childSnapshot) {
+      
+      snapshot.forEach( function (childSnapshot) {
         html_tab_row = html_tab_row+'<td>'+childSnapshot.val()+'</td>';           
       });
+
+
+      /*snapshot.forEach(function (childSnapshot) {
+        html_tab_row = html_tab_row+'<td>'+childSnapshot.val()+'</td>';           
+      });*/
       html_tab_row = html_tab_row+'</tr>';
 
       divTabla.children[0].children[0].children[0].insertAdjacentHTML('beforeEnd',html_tab_row);
      
   }); 
+
+
+
+fDB.on("child_removed",function (snapshot) {
+console.log("adasdadasd");
+
+$('tr:contains("'+snapshot.key+'")').remove();
+  //  document.getElementById(snapshot.key).parentElement.remove();
+  }); 
+
+
 
 }
 
@@ -133,17 +156,21 @@ function modificar_row(row,nodo){
   event.preventDefault();
   var sId = row[0].children[0].children[0].value;
   console.log(sId);
-  var database = firebase.database();
+  //var database = firebase.database();
   var array={};
+  var updates={};
   var json ;
 
 
   var aTh = row[0].parentElement.children[0].children;
+//Map<String, Object> userUpdates = new HashMap<String, Object>();
 
   for(var i = 1 ; i < row[0].children.length; i++)
   {
     console.log(aTh[i].innerText + " -> "+row[0].children[i].children[0].value);
     array[aTh[i].innerText] = row[0].children[i].children[0].value;
+//userUpdates.put(nodo+"/"+sId+"/"+aTh[i].innerText, row[0].children[i].children[0].value);
+//userUpdates.put(nodo+"/"+sId+"/"+aTh[i].innerText, "Amazing Grace");
 
     /*sCellValue = e[0].children[i].innerText;
     tTd = e.find('td');
@@ -157,12 +184,16 @@ function modificar_row(row,nodo){
   }
   console.log(array);
 
-  json = JSON.stringify(array);
-console.log(JSON.stringify(array));
+  updates["/"+nodo+"/"+sId] = array;
 
-  firebase.database().ref(nodo+"/"+sId).set(
-    json
-    ).then(function() { bSuccess =true; })
+  json = JSON.stringify(array);
+  
+  console.log(updates);
+ // console.log(firebase.database().ref().child(nodo+"/"+sId));
+
+  firebase.database().ref().update(
+    updates
+    );//.then(function() { bSuccess =true; })
 
 
 }
